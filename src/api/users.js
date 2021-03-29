@@ -9,9 +9,9 @@ const pathToFile = `${__dirname}/users.json`;
 async function readUsersFile() {
   try {
     const text = await readFile(pathToFile, { encoding: 'utf8' });
-    return text;
+    return JSON.parse(text);
   } catch (error) {
-    return Error('Error in funcion readUsersFile');
+    throw Error('Error in funcion readUsersFile');
   }
 }
 async function writeUsersFile(text) {
@@ -40,9 +40,8 @@ router.get('/', async (req, res) => {
     .catch(async () => {
       try {
         const data = await getData('https://jsonplaceholder.typicode.com/users');
-        console.log(data);
         await writeUsersFile(data);
-        res.json(JSON.parse(data));
+        res.json(data);
       } catch (error) {
         res.status(500).send({ message: error.message });
       }
