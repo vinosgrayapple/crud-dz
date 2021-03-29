@@ -19,12 +19,12 @@ async function writeUsersFile(text) {
     await writeFile(pathToFile, JSON.stringify(text), { encoding: 'utf8' });
     return;
   } catch (error) {
-    return new Error('Error in funcion writeUsersFile');
+    throw Error('Error in funcion writeUsersFile');
   }
 }
 const getData = async (url) => {
   const result = await axios(url).then(({ data }) => data);
-  return JSON.parse(result);
+  return result;
 };
 /* get /api/v1/users - получает всех юзеров из файла users.json,
 если его нет - получает данные с
@@ -35,13 +35,13 @@ router.get('/', async (req, res) => {
   stat(pathToFile)
     .then(async () => {
       const data = await readUsersFile();
-      res.send(JSON.parse(data));
+      res.json(data);
     })
     .catch(async () => {
       try {
         const data = await getData('https://jsonplaceholder.typicode.com/users');
         await writeUsersFile(data);
-        res.json(data);
+        res.json(JSON.parse(data));
       } catch (error) {
         res.status(500).send({ message: error.message });
       }
@@ -74,10 +74,7 @@ patch /api/v1/users/:userId
 router.patch('/:userId', async (req, res) => {
   const { userId } = req.params;
   const users = await readUsersFile();
-  const user = users.find((u) => u.id === userId);
-  const newUser = { ...user, ...req.body };
-  const newUsers = users.filter((u) => u.id !== userId);
-  newUsers.push(newUser);
+  const newUsers = users.map((u) => (u.id !== userId ? u : ({ ...u, ...req.body })));
   await writeUsersFile(newUsers);
   res.json({ status: 'success', id: userId });
 });
