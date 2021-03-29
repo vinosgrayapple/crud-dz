@@ -62,7 +62,7 @@ router.post('/', async (req, res) => {
   newUser.id = maxId + 1;
   users.push(newUser);
   await writeUsersFile(users);
-  res.json({ status: 'success', id: newUser.id });
+  res.json({ status: 'ok', id: newUser.id });
 });
 /*
 patch /api/v1/users/:userId
