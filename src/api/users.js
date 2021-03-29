@@ -40,6 +40,7 @@ router.get('/', async (req, res) => {
     .catch(async () => {
       try {
         const data = await getData('https://jsonplaceholder.typicode.com/users');
+        console.log(data);
         await writeUsersFile(data);
         res.json(JSON.parse(data));
       } catch (error) {
