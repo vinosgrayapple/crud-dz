@@ -87,7 +87,8 @@ delete /api/v1/users/:userId
 router.delete('/:userId', async (req, res) => {
   const { userId } = req.params;
   const users = await readUsersFile();
-  const newUsers = users.filter((u) => u.id !== userId);
+  console.log('req.params :>> ', req.params);
+  const newUsers = users.filter((u) => Number(u.id) !== Number(userId));
   await writeUsersFile(newUsers);
   res.json({ status: 'success', id: userId });
 });
