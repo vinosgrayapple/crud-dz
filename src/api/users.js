@@ -51,12 +51,7 @@ router.get('/', async (req, res) => {
 с id равным id последнего элемента + 1
 и возвращает { status: 'success', id: id } */
 router.post('/', async (req, res) => {
-  const {
-    name, username, email, address, phone, website
-  } = req.body;
-  const newUser = {
-    name, username, email, address, phone, website
-  };
+  const newUser = { ...req.body };
   const users = await readUsersFile();
   const maxId = users.reduce((a, b) => (+b.id > a ? +b.id : a), 0);
   newUser.id = maxId + 1;
