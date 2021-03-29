@@ -52,6 +52,7 @@ router.get('/', async (req, res) => {
 и возвращает { status: 'success', id: id } */
 router.post('/', async (req, res) => {
   const newUser = { ...req.body };
+  console.log('newUser :>>', newUser);
   const users = await readUsersFile();
   const maxId = users.reduce((a, b) => (+b.id > a ? +b.id : a), 0);
   newUser.id = maxId + 1;
@@ -69,7 +70,7 @@ patch /api/v1/users/:userId
 router.patch('/:userId', async (req, res) => {
   const { userId } = req.params;
   const users = await readUsersFile();
-  const newUsers = users.map((u) => (u.id !== userId ? u : ({ ...u, ...req.body })));
+  const newUsers = users.map((u) => (+(u.id) !== +(userId) ? u : ({ ...u, ...req.body })));
   await writeUsersFile(newUsers);
   res.json({ status: 'success', id: userId });
 });
