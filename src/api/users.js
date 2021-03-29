@@ -24,7 +24,7 @@ async function writeUsersFile(text) {
 }
 const getData = async (url) => {
   const result = await axios(url).then(({ data }) => data);
-  return result;
+  return JSON.parse(result);
 };
 /* get /api/v1/users - получает всех юзеров из файла users.json,
 если его нет - получает данные с
@@ -57,35 +57,46 @@ router.post('/', async (req, res) => {
   const newUser = {
     name, username, email, address, phone, website
   };
-  const data = await readUsersFile();
-  const users = JSON.parse(data);
+  const users = await readUsersFile();
   const maxId = users.reduce((a, b) => (+b.id > a ? +b.id : a), 0);
   newUser.id = maxId + 1;
   users.push(newUser);
   await writeUsersFile(users);
   res.json({ status: 'success', id: newUser.id });
 });
-module.exports = router;
 /*
-  "name": "Leanne Graham",
-    "username": "Bret",
-    "email": "Sincere@april.biz",
-    "address": {
-      "street": "Kulas Light",
-      "suite": "Apt. 556",
-      "city": "Gwenborough",
-      "zipcode": "92998-3874",
-      "geo": {
-        "lat": "-37.3159",
-        "lng": "81.1496"
-      }
-    },
-    "phone": "1-770-736-8031 x56442",
-    "website": "hildegard.org",
-    "company": {
-      "name": "Romaguera-Crona",
-      "catchPhrase": "Multi-layered client-server neural-net",
-      "bs": "harness real-time e-markets"
-    }
-
+patch /api/v1/users/:userId
+ - получает новый объект, дополняет его
+ полями юзера в users.json, с id равным userId,
+ и возвращает
+ { status: 'success', id: userId }
 */
+router.patch('/:userId', async (req, res) => {
+  const { userId } = req.params;
+  const users = await readUsersFile();
+  const user = users.find((u) => u.id === userId);
+  const newUser = { ...user, ...req.body };
+  const newUsers = users.filter((u) => u.id !== userId);
+  newUsers.push(newUser);
+  await writeUsersFile(newUsers);
+  res.json({ status: 'success', id: userId });
+});
+/*
+delete /api/v1/users/:userId
+ - удаляет юзера в users.json,
+  с id равным userId,
+  и возвращает { status: 'success', id: userId }
+*/
+router.delete('/:userId', async (req, res) => {
+  const { userId } = req.params;
+  const users = await readUsersFile();
+  const newUsers = users.filter((u) => u.id !== userId);
+  await writeUsersFile(newUsers);
+  res.json({ status: 'success', id: userId });
+});
+/* delete /api/v1/users - удаляет файл users.json */
+router.delete('/', async (req, res) => {
+  await unlink(pathToFile);
+  res.status(200).json({ status: 'ok' });
+});
+module.exports = router;
